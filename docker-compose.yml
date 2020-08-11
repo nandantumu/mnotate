@@ -1,7 +1,38 @@
 version: '3'
 services:
     cassandra:
+      container_name: cassandra
       image: cassandra:3.11
-      
+      networks: 
+        local_net:
+      volumes: 
+        - cassandra_volume:/var/lib/cassandra
 
-volumes:
+    elasticsearch:
+      container_name: elasticsearch
+      image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
+      environment:
+        - discovery.type=single-node
+      networks: 
+        local_net:
+      volumes: 
+        - elastic_volume:/usr/share/elasticsearch/data
+
+    janusgraph:
+      container_name: janusgraph
+      build: ./janusgraph
+      ports:
+        - 8182:8182
+      networks: 
+        local_net:
+      depends_on:
+        - cassandra
+        - elasticsearch
+
+volumes: 
+  cassandra_volume:
+  elastic_volume:
+
+networks:
+  local_net:
+      driver: bridge
